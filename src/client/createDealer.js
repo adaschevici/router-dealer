@@ -33,7 +33,8 @@ const createDealer = (batchSocket, exit, logger) => {
       })
     }
 
-    for await (const [rawMessage] of batchSocket) {
+    for await (const [rawMessage, ...rest] of batchSocket) {
+      console.log(rawMessage.toString(), rest)
       const msg = JSON.parse(rawMessage.toString())
       switch (msg.type) {
         case 'start':

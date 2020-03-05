@@ -62,7 +62,7 @@ const batchSize = bigInt(String(argv.batchSize))
 const start = argv.start
 
 async function run() {
-  const batchSocket = new Router()
+  const batchSocket = new Router({ sendHighWaterMark: 1, sendTimeout: 1 })
   const signalSocket = new Publisher()
   const router = createRouter(
     batchSocket,
@@ -75,10 +75,11 @@ async function run() {
     process.exit
   )
 
-  router()
-
   await batchSocket.bind(`tcp://*:${port}`)
   await signalSocket.bind(`tcp://*:${pubPort}`)
+
+  router()
+
   logger.info(
     `Server listening on port ${port}, signal publish on port ${pubPort}`
   )

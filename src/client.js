@@ -46,12 +46,12 @@ async function run() {
     logger
   )
 
-  dealer()
-  subscriber()
-
   batchSocket.connect(`tcp://${host}:${port}`)
   subSocket.connect(`tcp://${host}:${pubPort}`)
   subSocket.subscribe('exit')
+  dealer()
+  subscriber()
+
   await batchSocket.send(JSON.stringify({ type: 'join' }))
 }
 

@@ -35,9 +35,8 @@ const createRouter = (
     return client
   }
 
-  const router = async channel => {
-    for await (const [, rawMessage] of batchSocket) {
-      console.log(topic.toString(), rawMessage.toString())
+  const router = async () => {
+    for await (const [channel, rawMessage] of batchSocket) {
       const msg = JSON.parse(rawMessage.toString())
 
       switch (msg.type) {
@@ -77,21 +76,13 @@ const createRouter = (
             `client ${channel.toString('hex')} found password "${pwd}"`
           )
           // publish exit signal and closes the app
-          await signalSocket.send(
-            [
-              'exit',
-              JSON.stringify({
-                password: pwd,
-                client: channel.toString('hex'),
-              }),
-            ],
-            0,
-            () => {
-              batchSocket.close()
-              signalSocket.close()
-              exit(0)
-            }
-          )
+          await signalSocket.send([
+            'exit',
+            JSON.stringify({
+              password: pwd,
+              client: channel.toString('hex'),
+            }),
+          ])
 
           break
         }
