@@ -3,6 +3,7 @@
 'use strict'
 
 const zmq = require('zeromq')
+const { Dealer, Subscriber } = require('zeromq')
 const yargs = require('yargs')
 const logger = require('./logger')
 const createDealer = require('./client/createDealer')
@@ -34,8 +35,8 @@ const port = argv.port
 const pubPort = argv.pubPort
 
 async function run() {
-  const batchSocket = new zmq.Push()
-  const subSocket = new zmq.Pull()
+  const batchSocket = new Dealer()
+  const subSocket = new Subscriber()
 
   const dealer = createDealer(batchSocket, process.exit, logger)
   const subscriber = createSubscriber(
@@ -45,13 +46,13 @@ async function run() {
     logger
   )
 
-  batchSocket.on('message', dealer)
-  subSocket.on('message', subscriber)
+  dealer()
+  subscriber()
 
-  await batchSocket.bind(`tcp://${host}:${port}`)
+  batchSocket.connect(`tcp://${host}:${port}`)
   subSocket.connect(`tcp://${host}:${pubPort}`)
-  await subSocket.subscribe('exit')
-  batchSocket.send(JSON.stringify({ type: 'join' }))
+  subSocket.subscribe('exit')
+  await batchSocket.send(JSON.stringify({ type: 'join' }))
 }
 
 run()

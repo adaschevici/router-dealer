@@ -1,12 +1,14 @@
 'use strict'
 
 const createSubscriber = (subSocket, batchSocket, exit, logger) => {
-  const subscriber = (topic, rawMessage) => {
-    if (topic.toString() === 'exit') {
-      logger.info(`received exit signal, ${rawMessage.toString()}`)
-      batchSocket.close()
-      subSocket.close()
-      exit(0)
+  const subscriber = async () => {
+    for await (const [topic, msg] of subSocket) {
+      if (topic.toString() === 'exit') {
+        logger.info(`received exit signal, ${msg.toString()}`)
+        batchSocket.close()
+        subSocket.close()
+        exit(0)
+      }
     }
   }
 
